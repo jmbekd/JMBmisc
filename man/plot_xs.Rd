@@ -4,52 +4,66 @@
 \alias{plot_xs}
 \title{Set up the plotting region for the cross section}
 \usage{
-plot_xs(data = null, distance = null, depth = null, gs_elev = null,
-  cross_section_params = cross_section_params())
+plot_xs(data = NULL, distance = NULL, depth = NULL, gs_elev = NULL,
+  name = NULL, xs_params = xs_params())
 }
 \arguments{
-\item{v_scale}{Vertical scale of the y-axis. Defaults to 10 (i.e.,
-in the resulting plot, 10 feet on the y-axis will correspond to 1 inch printed).}
+\item{data}{A data.frame or data.table with columns of "distance" (the maximum desired
+distance of the cross section), "depth" (the maximum depth below ground surface), and
+"gs_elev" (ground surface elevation). This parameter is not necessary if the distance,
+depth, and gs_elev parameters are individually specified (see below). Defaults to NULL.}
 
-\item{h_scale}{Horizontal scale of the x-axis. Defaults to 100 (i.e.,
-in the resulting plot, 100 feet on the x-axis will correspond to 1 inch printed).}
+\item{distance}{Horizontal distance of the boreholes and/or wells along the cross section or
+the maximum distance that the cross section should extend. Can be a single value or a
+vector of distances. If a vector of values is supplied, the maximum value is selected.
+Defaults to NULL.
+Note, the distance parameter is rounded to the nearest h_major unit (see ?xs_params) and
+the x-axis limits are determined using the 'pretty' function (see ?pretty) with an
+interval of 0 to the rounded distance value.}
 
-\item{v_minor}{Interval for plotting minor horizontal grid lines. Defaults to 1 (i.e.,
-a minor gridline every foot).}
+\item{depth}{The total depth of the boreholes and/or wells below ground surface, or the
+the maximum distance below ground surface that the cross section should extend to. Can be
+a single value or a vector of depths. If a vector of depths is supplied, the maximum value
+is selected. Defaults to NULL.
+Note, the depth parameter is rounded to the nearest v_major unit (see ?xs_params)
+and the y-axis limits are determined using the 'pretty' function (see ?pretty) with
+the upper limit being the ground surface elevation (see gs_elev) and the lower limit
+being gs_elev - the rounded depth value.}
 
-\item{v_major}{Interval for plotting major horizontal grid lines. Defaults to 10 (i.e.,
-a major gridline every 10 feet).}
+\item{gs_elev}{The ground surface elevation at each of the boreholes and/or wells along the
+cross section. Can be a single value or a vector of depths. If a vector of ground
+surface elevations is supplied, the maximum value is selected. Defaults to NULL.
+Note, the gs_elev parameter is rounded to the nearest v_minor unit (see ?xs_params)
+and the y-axis limits are determined using the 'pretty' function (see ?pretty) with
+the upper limit being the rounded gs_elev value and the lower limit
+being the rounded gs_elev - and the depth (see depth).}
 
-\item{h_minor}{Interval for plotting minor vertical grid lines. Defaults to 20 (i.e.,
-a minor gridline every 20 feet).}
+\item{name}{The cross section ID (e.g., A, B, etc.). Defaults to NULL.}
 
-\item{h_major}{Interval for plotting major vertical grid lines. Defaults to 100 (i.e.,
-a major gridline every 100 feet).}
-
-\item{h_major}{Interval for plotting major vertical grid lines. Defaults to 100 (i.e.,
-a major gridline every 100 feet).}
-
-\item{units}{Unit of measurement for the x and y axes. Defaults to feet ("ft").}
-
-\item{plot_v_minor}{Plot minor horizontal grid lines? Defaults to TRUE.}
-
-\item{plot_v_major}{Plot major horizontal grid lines? Defaults to TRUE.}
-
-\item{plot_h_minor}{Plot minor vertical grid lines? Defaults to FALSE.}
-
-\item{plot_h_major}{Plot major vertical grid lines? Defaults to TRUE.}
+\item{xs_params}{A list of cross section parameters from the xs_params function (see
+  ?xs_params). Defaults to xs_params().}
 }
 \value{
-List of parameters that will be used to set desired cross section parameters.
+A plot of an empty gridded cross section.
 }
 \description{
-This function sets up the plotting region for the cross section
+This function sets up the plotting region for the cross section. Inputs are the total
+length of the cross section, the depth below ground surface of the boreholes and/or wells
+(or the maximum desired depth below ground surface that the cross section should extend),
+and the ground surface elevation of the boreholes and/or wells. Using the supplied
+information, and the cross section parameters set up using the xs_params function, an empty
+gridded cross section will be plotted.
 }
 \examples{
-xs_params()
+plot_xs(distance = c(100, 200, 600), depth = c(30, 15, 55), gs_elev = c(10, 12, 11),
+name = "A", xs_params = xs_params())
 }
 \keyword{cross}
-\keyword{params,}
-\keyword{section}
+\keyword{depth,}
+\keyword{distance,}
+\keyword{gs_elev,}
+\keyword{plot,}
+\keyword{section,}
 \keyword{xs,}
+\keyword{xs_params}
 

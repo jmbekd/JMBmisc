@@ -1,43 +1,55 @@
 #' Set up the plotting region for the cross section
 #'
-#' This function sets up the plotting region for the cross section
+#' This function sets up the plotting region for the cross section. Inputs are the total
+#' length of the cross section, the depth below ground surface of the boreholes and/or wells
+#' (or the maximum desired depth below ground surface that the cross section should extend),
+#' and the ground surface elevation of the boreholes and/or wells. Using the supplied
+#' information, and the cross section parameters set up using the xs_params function, an empty
+#' gridded cross section will be plotted.
 #'
-#' @param v_scale Vertical scale of the y-axis. Defaults to 10 (i.e.,
-#'   in the resulting plot, 10 feet on the y-axis will correspond to 1 inch printed).
-#' @param h_scale Horizontal scale of the x-axis. Defaults to 100 (i.e.,
-#'   in the resulting plot, 100 feet on the x-axis will correspond to 1 inch printed).
-#' @param v_minor Interval for plotting minor horizontal grid lines. Defaults to 1 (i.e.,
-#'   a minor gridline every foot).
-#' @param v_major Interval for plotting major horizontal grid lines. Defaults to 10 (i.e.,
-#'   a major gridline every 10 feet).
-#' @param h_minor Interval for plotting minor vertical grid lines. Defaults to 20 (i.e.,
-#'   a minor gridline every 20 feet).
-#' @param h_major Interval for plotting major vertical grid lines. Defaults to 100 (i.e.,
-#'   a major gridline every 100 feet).
-#' @param h_major Interval for plotting major vertical grid lines. Defaults to 100 (i.e.,
-#'   a major gridline every 100 feet).
-#' @param units Unit of measurement for the x and y axes. Defaults to feet ("ft").
-#' @param plot_v_minor Plot minor horizontal grid lines? Defaults to TRUE.
-#' @param plot_v_major Plot major horizontal grid lines? Defaults to TRUE.
-#' @param plot_h_minor Plot minor vertical grid lines? Defaults to FALSE.
-#' @param plot_h_major Plot major vertical grid lines? Defaults to TRUE.
+#' @param data A data.frame or data.table with columns of "distance" (the maximum desired
+#'   distance of the cross section), "depth" (the maximum depth below ground surface), and
+#'   "gs_elev" (ground surface elevation). This parameter is not necessary if the distance,
+#'   depth, and gs_elev parameters are individually specified (see below). Defaults to NULL.
+#' @param distance Horizontal distance of the boreholes and/or wells along the cross section or
+#'   the maximum distance that the cross section should extend. Can be a single value or a
+#'   vector of distances. If a vector of values is supplied, the maximum value is selected.
+#'   Defaults to NULL.
+#'   Note, the distance parameter is rounded to the nearest h_major unit (see ?xs_params) and
+#'   the x-axis limits are determined using the 'pretty' function (see ?pretty) with an
+#'   interval of 0 to the rounded distance value.
+#' @param depth The total depth of the boreholes and/or wells below ground surface, or the
+#'   the maximum distance below ground surface that the cross section should extend to. Can be
+#'   a single value or a vector of depths. If a vector of depths is supplied, the maximum value
+#'   is selected. Defaults to NULL.
+#'   Note, the depth parameter is rounded to the nearest v_major unit (see ?xs_params)
+#'   and the y-axis limits are determined using the 'pretty' function (see ?pretty) with
+#'   the upper limit being the ground surface elevation (see gs_elev) and the lower limit
+#'   being gs_elev - the rounded depth value.
+#' @param gs_elev The ground surface elevation at each of the boreholes and/or wells along the
+#'   cross section. Can be a single value or a vector of depths. If a vector of ground
+#'   surface elevations is supplied, the maximum value is selected. Defaults to NULL.
+#'   Note, the gs_elev parameter is rounded to the nearest v_minor unit (see ?xs_params)
+#'   and the y-axis limits are determined using the 'pretty' function (see ?pretty) with
+#'   the upper limit being the rounded gs_elev value and the lower limit
+#'   being the rounded gs_elev - and the depth (see depth).
+#' @param name The cross section ID (e.g., A, B, etc.). Defaults to NULL.
+#' @param xs_params A list of cross section parameters from the xs_params function (see
+#'   ?xs_params). Defaults to xs_params().
 #'
-#' @return List of parameters that will be used to set desired cross section parameters.
+#' @return A plot of an empty gridded cross section.
 #'
-#' @keywords xs, params, cross section
+#' @keywords xs, cross section, plot, gs_elev, depth, distance, xs_params
 #'
 #' @export
 #'
 #' @examples
-#' xs_params()
+#' plot_xs(distance = c(100, 200, 600), depth = c(30, 15, 55), gs_elev = c(10, 12, 11),
+#' name = "A", xs_params = xs_params())
 
-plot_xs <- function(data = null,
-                               distance = null, depth = null, gs_elev = null,
-                               cross_section_params = cross_section_params()) {
-  ## data should be a data.frame or data.table with columns of
-  ## "distance", "depth" (total depth), and "gs_elev" (ground surface elevation).
-  ## the data parameter is not necessary if the dist, depth, and gs_elev parameters are
-  ## individually specified.
+plot_xs <- function(data = NULL,
+                    distance = NULL, depth = NULL, gs_elev = NULL,
+                    name = NULL, xs_params = xs_params()) {
 
   if (!is.null(data)) {
     names <- names(data)
@@ -53,16 +65,16 @@ plot_xs <- function(data = null,
   }
 
   if (length(distance) > 1) {
-    warning("more than one distance specified. only the first entry will be used.")
-    distance <- distance[1]
+    warning("more than one distance specified. only the maximum value will be used.")
+    distance <- max(distance)
   }
   if (length(depth) > 1) {
-    warning("more than one distance specified. only the first entry will be used.")
-    depth <- depth[1]
+    warning("more than one depth specified. only the maximum value will be used.")
+    depth <- max(depth)
   }
   if (length(gs_elev) > 1) {
-    warning("more than one distance specified. only the first entry will be used.")
-    gs_elev <- gs_elev[1]
+    warning("more than one gs_elev specified. only the maximum value will be used.")
+    gs_elev <- max(gs_elev)
   }
 
   ## if distance, depth, and gs_elev parameters not specified, determine from data
@@ -71,47 +83,57 @@ plot_xs <- function(data = null,
   if (is.null(gs_elev)) gs_elev <- max(data[["gs_elev"]])
 
   ## round the distance, depth, and gs_elev parameters
-  distance <- plyr::round_any(distance, cross_section_params[["h_major"]], f = ceiling)
-  depth <- plyr::round_any(depth, cross_section_params[["v_major"]], f = ceiling)
-  gs_elev <- plyr::round_any(gs_elev, cross_section_params[["v_minor"]], f = ceiling)
+  distance <- plyr::round_any(distance, xs_params[["h_major"]], f = ceiling)
+  depth <- plyr::round_any(depth, xs_params[["v_major"]], f = ceiling)
+  gs_elev <- plyr::round_any(gs_elev, xs_params[["v_minor"]], f = ceiling)
 
   ## determine the figure height and width and x and y axes limits
-  fig_height <- depth / cross_section_params[["v_scale"]]
-  fig_width <- distance / cross_section_params[["h_scale"]]
   y_lim <- range(pretty(c(gs_elev, gs_elev - depth)))
-  x_lim <- range(pretty(c(0, dist)))
+  x_lim <- range(pretty(c(0, distance)))
+  fig_height <- diff(y_lim) / xs_params[["v_scale"]]
+  fig_width <- diff(x_lim) / xs_params[["h_scale"]]
+
+  par(pin = c(fig_width, fig_height), yaxs = "i", xaxs = "i",
+      mar = c(5, 5, 5, 5)) # a value of 5 lines was chosen as 5 lines = 1 inch
 
   ## set up plotting region
   plot(0, 0, type = "n",
        xlim = x_lim, ylim = y_lim, axes = FALSE,
-       xlab = paste0("Distance (" , cross_section_params[["units"]], ")"),
-       ylab = paste0("Elevation (" , cross_section_params[["units"]], ")"),
+       xlab = paste0("Distance (" , xs_params[["units"]], ")"),
+       ylab = paste0("Elevation (" , xs_params[["units"]], ")"),
        main = paste0("Cross Section ", name, "-", name, "'"))
 
   ## add major and minor tick marks to x and y axes
   axis(1, at = seq(from = x_lim[1], to = x_lim[2],
-                   by = cross_section_params[["h_minor"]]), label = FALSE, tck = -0.025)
+                   by = xs_params[["h_minor"]]), label = FALSE, tck = -0.01)
   axis(1, at = seq(from = x_lim[1], to = x_lim[2],
-                   by = cross_section_params[["h_major"]]))
+                   by = xs_params[["h_major"]]))
   axis(2, at = seq(from = y_lim[1], to = y_lim[2],
-                   by = cross_section_params[["v_minor"]]), label = FALSE, tck = -0.025)
+                   by = xs_params[["v_minor"]]), label = FALSE, tck = -0.01)
   axis(2, at = seq(from = y_lim[1], to = y_lim[2],
-                   by = cross_section_params[["v_major"]]), las = 2)
+                   by = xs_params[["v_major"]]), las = 2)
   axis(4, at = seq(from = y_lim[1], to = y_lim[2],
-                   by = cross_section_params[["v_minor"]]), label = FALSE, tck = -0.025)
+                   by = xs_params[["v_minor"]]), label = FALSE, tck = -0.01)
   axis(4, at = seq(from = y_lim[1], to = y_lim[2],
-                   by = cross_section_params[["v_major"]]), las = 2)
+                   by = xs_params[["v_major"]]), las = 2)
+  mtext(text = paste0("Elevation (" , xs_params[["units"]], ")"), side = 4,
+        line = 3)
 
   ## add major and minor gridlines to x and y axes
-  if (cross_section_params[["plot_h_minor"]]) {
-    abline(v = seq(from = x_lim[1], to = x_lim[2], by = h_minor), lty = 3, lwd = 0.3)
+  if (xs_params[["plot_h_minor"]]) {
+    abline(v = seq(from = x_lim[1], to = x_lim[2], by = xs_params[["h_minor"]]),
+           lty = 3, lwd = 0.3)
   }
-  if (cross_section_params[["plot_h_major"]]) {
-    abline(v = seq(from = x_lim[1], to = x_lim[2], by = h_major), lty = 3, lwd = 0.5)
+  if (xs_params[["plot_h_major"]]) {
+    abline(v = seq(from = x_lim[1], to = x_lim[2], by = xs_params[["h_major"]]),
+           lty = 3, lwd = 0.5)
   }
-  if (cross_section_params[["plot_v_minor"]]) {
-    abline(h = seq(from = y_lim[1], to = y_lim[2], by = v_minor), lty = 3, lwd = 0.3)
+  if (xs_params[["plot_v_minor"]]) {
+    abline(h = seq(from = y_lim[1], to = y_lim[2], by = xs_params[["v_minor"]]),
+           lty = 3, lwd = 0.3)
   }
-  if (cross_section_params[["plot_v_major"]])
-    abline(h = seq(from = y_lim[1], to = y_lim[2], by = v_major), lty = 2, lwd = 0.5)
+  if (xs_params[["plot_v_major"]]) {
+    abline(h = seq(from = y_lim[1], to = y_lim[2], by = xs_params[["v_major"]]),
+           lty = 2, lwd = 0.5)
   }
+}
