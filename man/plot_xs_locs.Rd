@@ -4,54 +4,72 @@
 \alias{plot_xs_locs}
 \title{Plot wells/boreholes on the cross section}
 \usage{
-plot_xs_locs(data = null, location = null, type = null, distance = null,
-  gs_elev = null, depth = null, tos = null, bos = null,
-  plot_gs = TRUE, w_width = 0.1, label_shift = 10,
-  cross_section_params = cross_section_params())
+plot_xs_locs(dt = NULL, location = NULL, type = NULL, distance = NULL,
+  gs_elev = NULL, depth = NULL, tos = NULL, bos = NULL,
+  plot_gs = TRUE, w_width = 0.1, label_shift = 2, xs_par = xs_params())
 }
 \arguments{
-\item{v_scale}{Vertical scale of the y-axis. Defaults to 10 (i.e.,
-in the resulting plot, 10 feet on the y-axis will correspond to 1 inch printed).}
+\item{dt}{A data.frame or data.table with columns of "location", "type", "distance",
+"gs_elev", "depth", "tos", and "bos". For explanations of these parameters and their
+valid values, see the definitions below. The data parameter is not necessary if the
+location, type, distance, gs_elev, depth, tos, and bos parameters are individually
+specified. Defaults to NULL.}
 
-\item{h_scale}{Horizontal scale of the x-axis. Defaults to 100 (i.e.,
-in the resulting plot, 100 feet on the x-axis will correspond to 1 inch printed).}
+\item{location}{A unique identifier for each borehole and/or well (e.g., "MW-3", "BH-45",
+etc.). Should be a vector of character strings. Defaults to NULL.}
 
-\item{v_minor}{Interval for plotting minor horizontal grid lines. Defaults to 1 (i.e.,
-a minor gridline every foot).}
+\item{type}{Is the specified location a well, borehole, etc.? Should be a vector of character
+strings such as "well", "borehole", "ssp", "svp", etc. Defaults to NULL.}
 
-\item{v_major}{Interval for plotting major horizontal grid lines. Defaults to 10 (i.e.,
-a major gridline every 10 feet).}
+\item{distance}{Horizontal distance of each of the boreholes and/or wells along the cross
+section. Should be a vector of depths. Defaults to NULL.}
 
-\item{h_minor}{Interval for plotting minor vertical grid lines. Defaults to 20 (i.e.,
-a minor gridline every 20 feet).}
+\item{gs_elev}{The ground surface elevation at each of the boreholes and/or wells along the
+cross section. Should be a vector of depths. Defaults to NULL.}
 
-\item{h_major}{Interval for plotting major vertical grid lines. Defaults to 100 (i.e.,
-a major gridline every 100 feet).}
+\item{depth}{The total depth (below ground surface) at each of the boreholes and/or wells
+along the cross section. Should be a vector of depths. Defaults to NULL.}
 
-\item{h_major}{Interval for plotting major vertical grid lines. Defaults to 100 (i.e.,
-a major gridline every 100 feet).}
+\item{tos}{The distance from the ground surface to the top of the screened interval for
+each well along the cross section. Should be a vector of depths. Defaults to NULL.}
 
-\item{units}{Unit of measurement for the x and y axes. Defaults to feet ("ft").}
+\item{bos}{The distance from the ground surface to the tbottom of the screened interval for
+each well along the cross section. Should be a vector of depths. Defaults to NULL.}
 
-\item{plot_v_minor}{Plot minor horizontal grid lines? Defaults to TRUE.}
+\item{w_width}{Width of the well screen in inches. Defaults to 0.1.}
 
-\item{plot_v_major}{Plot major horizontal grid lines? Defaults to TRUE.}
+\item{label_shift}{The vertical distance by which to shift the borehole and/or well
+labels. Defaults to 2.}
 
-\item{plot_h_minor}{Plot minor vertical grid lines? Defaults to FALSE.}
+\item{plot_gs.}{Should a line be plotted between the ground surface elevations (gs_elev)
+of the boreholes and wells? Defaults to TRUE.}
 
-\item{plot_h_major}{Plot major vertical grid lines? Defaults to TRUE.}
+\item{xs_params}{A list of cross section parameters from the xs_params function (see
+  ?xs_params). Defaults to xs_params().}
 }
 \value{
-List of parameters that will be used to set desired cross section parameters.
+Plots the wells and boreholes on the cross section set up using grid_xs().
 }
 \description{
-This function plots wells and/or boreholes on the cross section
+This function plots wells and/or boreholes on the cross section. The function will plot a
+rectangular screened interval for wells. The bottom of a well is denoted with a dash and
+the bottom of a borehole is denoted with a point.
 }
 \examples{
-xs_params()
+grid_xs(distance = c(100, 200, 550),
+        depth = c(30, 15, 55),
+        gs_elev = c(10, 12, 11),
+        name = "A", xs_par = xs_params())
+plot_xs_locs(location = c("MW-1", "BH-5", "CPT-3"),
+             type = c("well", "borehole", "cpt"),
+             distance = c(100, 200, 550),
+             gs_elev = c(11, 8, 12),
+             depth = c(60, 42, 90),
+             tos = c(45, NA, NA),
+             bos = c(55, NA, NA))
 }
 \keyword{cross}
-\keyword{params,}
+\keyword{plot,}
 \keyword{section}
 \keyword{xs,}
 
