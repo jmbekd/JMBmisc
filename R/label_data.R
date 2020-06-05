@@ -1,56 +1,67 @@
 library("data.table")
 distance <- c(1, 1.1, 1.25)
-gs_elev <- c( 2, 2.1, 3)
-labels <- c("one", "eleven", "George st")
+gs_elev <- c( 2, 2.1, 2.5)
+labels <- c("one", "two", "three")
 
-loc_labels_orig <- data.table(x = distance, y = gs_elev, label = labels)
+loc_labels <- data.table(x = distance, y = gs_elev, label = labels)
 
 plot(1:5, 1:5, type = "n")
 label_data <- function(data,
-                       # label = TRUE,
-                       # n_iter = 50,
-                       # tolerance = 0.01,
+                       n_iter = 5,
+                       tolerance = 0.01,
+                       shift_type = "min",
                        ...) {
 
   data <- unique(data)
+  data <- data[!(is.na(label)), ] # Remove empty labels
   setorder(data, x, y) # Order data
+  data[, id := .I] # adds row numbers
   data[, c("xo", "yo") := .(x, y)] # Save the original x, y coordinates
-  data[, label := paste0(" ", label, " ")] # Adds some additional space for bounding box
+  data[, iter := 0]
 
-  #### Calculates length and width of labels ----
-  cex_val <- ifelse(c("cex") %in% names(list(...)),
-                    list(...)[["cex"]],
-                    par("cex"))
-  data[, width_str :=
-         round(strwidth(label,
-                        cex = cex_val),
-               6)]
-  data[, height_str :=
-         round(strheight(label,
-                         cex = cex_val * 5 / 3),
-               6)] # Adds some padding along height
-  #### End calculation of length and width of labels ----
-  bb_labels(data, ...)
-  # data[, bb_labels(data, ...)]
-  cat("This is the current 'data'\n")
+  # Calculates bounding boxes for labels
+  bb_data <<- copy(bb_labels(data, ...))
+  cat("This is 'bb_data'\n")
   print(data[])
-  cat("\n")
-# iter <- 1
-# while (iter < n_iter) {
-#   # Calculate bounding boxes for labels
-#   data[, label_bounding_box(data, ...)]
-#   print(data)
-#   # Determine if there is overlap greater than the tolerance level
-#   data[, overlap := (xleft - shift(xright, 1, type = "lead") > -1 * tolerance) &
-#          (xright - shift(xleft, 1, type = "lead") > tolerance) &
-#          (ytop - shift(ybottom, 1, type = "lead") > tolerance) &
-#          (ybottom - shift(ytop, 1, type = "lead") < -1 * tolerance)]
-#   if (!(any(data[["overlap"]], na.rm = TRUE))) {iter <- n_iter}
-#
-#   # Shift labels if there is overlap
-#   # data[, shift_labels(data, iteration = iter)]
-#   iter <- iter + 1
-# }
+  cat("End of 'bb_data'\n\n")
+
+  while (max(data[["iter"]]) <= n_iter) {
+    # Calculate overlap
+    overlap <- calc_overlap(data)
+    overlap_data <<- copy(overlap)
+    # dput(overlap)
+    cat("This is the current 'overlap'\n")
+    print(overlap[])
+    cat("End of 'overlap'\n\n")
+
+    if (nrow(overlap) == 0) {
+      cat("No labels are overlapping\n\n")
+      break
+    }
+
+    # Calculate shift
+    shifts <- calc_shifts(overlap, tolerance, shift_type)
+    shifts_data <<- copy(shifts)
+
+    if (nrow(shifts) == 0) {
+      cat("No significant overlaps\n\n")
+      break
+    }
+
+    cat("This is the current 'shifts'\n")
+    print(overlap[])
+    cat("End of 'shifts'\n\n")
+
+    # Shift labels
+    shift_labels(data, shifts)
+    shift_labels_data <<- copy(data)
+    cat("This is the current step\n")
+    print(i)
+    cat("This is the current 'data'\n")
+    print(data)
+    cat("End of 'data'\n\n")
+  }
+
 #
 # #### Plots labels ----
   # For the labeling to work, require 'pos = 4' and 'offset = 0'
@@ -74,35 +85,130 @@ label_data <- function(data,
               border = .I), by = .I]
 return(data[])
 }
+label_data(data = loc_labels, cex = 1, srt = 90)
 
 bb_labels <- function(data, ...) { # Calculates bounding boxes for text labels
+  cex_val <- ifelse(c("cex") %in% names(list(...)),
+                    list(...)[["cex"]],
+                    par("cex"))
+  srt_val <- ifelse(c("srt") %in% names(list(...)),
+                    list(...)[["srt"]],
+                    par("srt"))
+
+  ## Calculates length and width of labels
+  # Adds some horizontal padding for bounding box
+  data[, label := paste0(" ", label, " ")]
+  data[, width_str :=
+         round(strwidth(label,
+                        cex = cex_val), 6)]
+  # Multiplying the cex by 5/3 adds some vertical padding
+  data[, height_str :=
+         round(strheight(label,
+                         cex = cex_val * 5 / 3), 6)]
+
+  # Calculates bounding boxes for text
   plot_usr <- par("usr")
   data[, xleft := x]
   data[, xright := x + width_str]
   data[, ybottom := y - height_str / 2]
   data[, ytop := y + height_str / 2]
 
-  if (c("srt") %in% names(list(...))) {
-    if (list(...)[["srt"]] == 90) {
-      data[, temp := width_str]
-      data[, width_str := height_str / (plot_usr[4] - plot_usr[3]) * par("pin")[2]]
-      data[, width_str := width_str / par("pin")[1] * (plot_usr[2] - plot_usr[1])]
-      data[, height_str := temp / (plot_usr[2] - plot_usr[1]) * par("pin")[1]]
-      data[, height_str := height_str / par("pin")[2] * (plot_usr[4] - plot_usr[3])]
-      data[, temp := NULL] # removes temporary column
-      data[, width_str := round(width_str, 6)] # forces rounding to 6 sig figs
-      data[, height_str := round(height_str, 6)] # forces rounding to 6 sig figs
+  if (srt_val == 90) {
+    data[, temp := width_str]
+    data[, width_str := height_str /
+           (plot_usr[4] - plot_usr[3]) * par("pin")[2]]
+    data[, width_str := width_str /
+           par("pin")[1] * (plot_usr[2] - plot_usr[1])]
+    data[, height_str := temp /
+           (plot_usr[2] - plot_usr[1]) * par("pin")[1]]
+    data[, height_str := height_str /
+           par("pin")[2] * (plot_usr[4] - plot_usr[3])]
+    data[, temp := NULL] # removes temporary column
+    data[, width_str := round(width_str, 6)] # forces rounding to 6 sig figs
+    data[, height_str := round(height_str, 6)] # forces rounding to 6 sig figs
 
-      data[, xleft := x - width_str / 2]
-      data[, xright := x + width_str / 2]
-      data[, ybottom := y]
-      data[, ytop := y + height_str]
-    }
+    data[, xleft := x - width_str / 2]
+    data[, xright := x + width_str / 2]
+    data[, ybottom := y]
+    data[, ytop := y + height_str]
   }
+  return(data[, c("width_str", "height_str") := NULL][])
+}
+
+calc_overlap <- function(data) {
+  # From https://stackoverflow.com/questions/38445864/r-implementation-to-union-of-overlapping-rectangles
+  overlap <- data[data,
+                  .(id1 = pmin(i.id, x.id), id2 = pmax(i.id, x.id),
+                    x0 = pmax(x.xleft, i.xleft), x1 = pmin(x.xright, i.xright),
+                    y0 = pmax(x.ybottom, i.ybottom), y1 = pmin(x.ytop, i.ytop)),
+                  on = .(xleft <= xright, xright >= xleft,
+                         ybottom <= ytop, ytop >= ybottom),
+                  by = .EACHI][id1 != id2]
+  overlap <- unique(overlap)
+  overlap <- overlap[, .SD[1],
+                     .SDcols = c("id1", "id2", "x0", "x1", "y0", "y1"),
+                     by = .("rects" = paste(id1, id2, sep = "_"))]
+  return(overlap[])
+}
+
+calc_shifts <- function(data, tolerance = 0.01, shift_type = "min") {
+  if (!(shift_type %in% c("x", "y", "min"))) {
+    stop(cat("shift_type must be one of 'x', 'y', or 'min'.\n"))
+  }
+
+  shifts <- copy(data)
+  # Calculate the amount the label needs to shift
+  shifts[, c("shift_x", "shift_y") :=
+           .(round((x1 - x0) / 2, 6),
+             round((y1 - y0) / 2, 6))]
+
+  shift_x <- data[, round((x1 - x0) / 2, 6)]
+  shift_y <- data[, round((y1 - y0) / 2, 6)]
+
+  if (shift_type == "x") {
+    cat("shift labels along x axis\n")
+    shifts <- data[, .(id1, id2,
+                       "shift_val" = shift_x,
+                       "shift_axis" = "shift_x")]
+  } else if (shift_type == "y") {
+    cat("shift labels along y axis\n")
+    shifts <- data[, .(id1, id2,
+                       "shift_val" = shift_y,
+                       "shift_axis" = "shift_y")]
+  } else if (shift_type == "min") {
+    shifts <- shifts[, shift_val :=
+                       do.call(pmin, .SD),
+                     .SDcols = c("shift_x", "shift_y")]
+    shifts <- shifts[, "shift_axis" :=
+                       colnames(.SD)[max.col(-.SD, ties.method = "first")],
+                     .SDcols = c("shift_x", "shift_y")]
+  }
+  return(shifts[shift_val > tolerance,
+                .(id1, id2, shift_val, shift_axis)])
+}
+
+shift_labels <- function(data, shifts) {
+  for (i in 1:nrow(shifts)) {
+    if (shifts[i, shift_axis] == "shift_x") {
+      shift_columns <- c("x", "xleft", "xright")
+    } else {
+      shift_columns <- c("y", "ybottom", "ytop")
+    }
+    rows_to_shift <- unlist(shifts[i, .(id1, id2)])
+    data[rows_to_shift,
+         (shift_columns) := .SD + c(-1, 1) * shifts[["shift_val"]],
+         .SDcols = shift_columns]
+  }
+  rows_shifted <- unique(unlist(shifts[, .(id1, id2)]))
+  data[rows_shifted, iter := iter + 1]
   return(data)
 }
 
-shift_labels <- function(data, iteration) {
+
+
+
+
+old_shift_labels <- function(data, iteration) {
   for (a in which(data[["overlap"]] == TRUE)) { # loops through all entries which overlap
     iteration <- iteration
 
