@@ -1,12 +1,5 @@
-library("data.table")
-distance <- c(1, 1.1, 1.2)
-gs_elev <- c(1, 1.2, 1.3)
-labels <- c("oneM", "twoj", "threeg")
 
-loc_labels <- data.table(x = distance, y = gs_elev, label = labels)
 
-plot(1:5, 1:5, type = "n")
-loc_labels[, points(x, y, pch = 19)]
 label_data <- function(data,
                        shift = TRUE,
                        n_iter = 5,
@@ -63,7 +56,7 @@ label_data <- function(data,
                   halo, hw, hc,
                   pos = 4, offset = 0,
                   ...)]
-  #### Plots rectangles around text - Useful for error checking ----
+  #### Plots rectangles around text - Used for error checking ----
   # data[, rect(xleft,
   #             ybottom,
   #             xright,
@@ -71,9 +64,10 @@ label_data <- function(data,
   #             border = .I), by = .I]
 return(data[])
 }
-label_data(data = loc_labels, cex = 1, srt = 0)
 
-bb_labels <- function(data, ...) { # Calculates bounding boxes for text labels
+
+bb_labels <- function(data,
+                      ...) { # Calculates bounding boxes for text labels
   cex_val <- ifelse(c("cex") %in% names(list(...)),
                     list(...)[["cex"]],
                     par("cex"))
@@ -138,7 +132,9 @@ calc_overlap <- function(data) {
   return(overlap[])
 }
 
-calc_shifts <- function(data, tolerance = 0.01, shift_type = "min") {
+calc_shifts <- function(data,
+                        tolerance = 0.01,
+                        shift_type = "min") {
   if (!(shift_type %in% c("x", "y", "min"))) {
     stop(cat("shift_type must be one of 'x', 'y', or 'min'.\n"))
   }
@@ -166,7 +162,8 @@ calc_shifts <- function(data, tolerance = 0.01, shift_type = "min") {
                 .(id1, id2, shift_val, shift_axis)])
 }
 
-shift_labels <- function(data, shifts) {
+shift_labels <- function(data,
+                         shifts) {
   for (i in 1:nrow(shifts)) {
     if (shifts[i, shift_axis] == "shift_x") {
       shift_columns <- c("x", "xleft", "xright")
@@ -183,13 +180,13 @@ shift_labels <- function(data, shifts) {
   return(data)
 }
 
-# add.alpha function from https://gist.github.com/mages/5339689
-add.alpha <- function(cols, alpha) rgb(t(col2rgb(cols) / 255),
-                                       alpha = alpha)
-
-#from TeachingDemos package
-halotext <- function(x, y = NULL, labels, col = "black",
-                     halo = FALSE, hw = 0.01, hc = "white",
+halotext <- function(x,
+                     y = NULL,
+                     labels,
+                     col = "black",
+                     halo = FALSE,
+                     hw = 0.01,
+                     hc = "white",
                      theta = seq(pi / 8, 2 * pi, length.out = 16),
                      ...) {
 
@@ -212,29 +209,21 @@ halotext <- function(x, y = NULL, labels, col = "black",
   text(xy$x, xy$y, labels, col = col, ...)
 }
 
-# haloText <- function(x, y = NULL, labels, halo = FALSE, hw = 0.01, hc = "black",
-#                      ...) {
-#   xy <- xy.coords(x, y)
+## The function below isn't used by the functions above, but
+## it is still a useful function.
+# add.alpha function from https://gist.github.com/mages/5339689
+add.alpha <- function(cols, alpha) rgb(t(col2rgb(cols) / 255),
+                                       alpha = alpha)
+
+
+# # Used the code below to test the above functions
+# library("data.table")
+# distance <- c(1, 1.1, 1.2)
+# gs_elev <- c(1, 1.2, 1.3)
+# labels <- c("oneM", "twoj", "threeg")
 #
-#   if (halo) {
-#     xo <- hw * strwidth("A", cex = ifelse(c("cex") %in% names(list(...)),
-#                                           list(...)[["cex"]],
-#                                           par("cex")))
-#     yo <- hw * strheight("A", cex = ifelse(c("cex") %in% names(list(...)),
-#                                            list(...)[["cex"]],
-#                                            par("cex")))
-#     theta <- seq(pi / 8, 2 * pi, length.out = 16)
-#     for (i in theta) {
-#       text(xy[["x"]] + cos(i) * xo, xy[["y"]] + sin(i) * yo, labels,
-#            col = hc, pos = 4, offset = 0,
-#            cex = ifelse(c("cex") %in% names(list(...)),
-#                         list(...)[["cex"]],
-#                         par("cex")),
-#            srt = ifelse(c("srt") %in% names(list(...)),
-#                         list(...)[["srt"]],
-#                         par("srt")))
-#     }
-#   }
-#   text(xy[["x"]], xy[["y"]], labels,
-#        pos = 4, offset = 0, ...)
-# }
+# loc_labels <- data.table(x = distance, y = gs_elev, label = labels)
+#
+# plot(1:5, 1:5, type = "n")
+# loc_labels[, points(x, y, pch = 19)]
+label_data(data = loc_labels, cex = 1, srt = 0)
