@@ -226,4 +226,4 @@ add.alpha <- function(cols, alpha) rgb(t(col2rgb(cols) / 255),
 #
 # plot(1:5, 1:5, type = "n")
 # loc_labels[, points(x, y, pch = 19)]
-label_data(data = loc_labels, cex = 1, srt = 0)
+# label_data(data = loc_labels, cex = 1, srt = 0)

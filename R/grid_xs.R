@@ -45,7 +45,7 @@
 #'
 #' @examples
 #' grid_xs(distance = c(100, 200, 600), depth = c(30, 15, 55), gs_elev = c(10, 12, 11),
-#' name = "A", xs_params = xs_params())
+#' name = "A", xs_par = xs_params())
 
 grid_xs <- function(data = NULL,
                     distance = NULL, depth = NULL, gs_elev = NULL,

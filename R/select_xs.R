@@ -23,8 +23,8 @@
 #' @export
 #'
 #' @examples
-#' bm <-
-#' select_xs("A", plot = TRUE, basemap = bm, coll = "red")
+#'
+# select_xs("A", plot = TRUE, basemap = bm, coll = "red")
 
 
 select_xs <- function(name, plot = FALSE, basemap = NULL, col = "blue") {

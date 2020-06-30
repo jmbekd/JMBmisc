@@ -15,12 +15,12 @@
 #' @export
 #'
 #' @examples
-#' bm <-
-#' list_xs(list(select_xs("A", plot = TRUE, basemap = bm, col = "red"),
-#'              select_xs("B", col = "blue"), select_xs("C", col = "green")),
-#'         plot = TRUE, basemap = bm, col = "red")
-#' windows()
-#' plot_xs(list_xs, col = "red")
+#'
+# list_xs(list(select_xs("A", plot = TRUE, basemap = bm, col = "red"),
+#              select_xs("B", col = "blue"), select_xs("C", col = "green")),
+#         plot = TRUE, basemap = bm, col = "red")
+# windows()
+# plot_xs(list_xs, col = "red")
 
 plot_xs_plan <- function(xs, col = "blue") {
   ## xs should be a select_xs object or a list_xs object

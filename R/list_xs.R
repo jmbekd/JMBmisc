@@ -21,11 +21,11 @@
 #'
 #' @examples
 #'
-#' list_xs(list(select_xs("A", plot = TRUE, basemap = bm, col = "red"),
-#'              select_xs("B", col = "blue"), select_xs("C", col = "green")),
-#'         plot = TRUE, basemap = bm, col = "red")
+# # list_xs(list(select_xs("A", plot = TRUE, basemap = bm, col = "red"),
+#              select_xs("B", col = "blue"), select_xs("C", col = "green")),
+#         plot = TRUE, basemap = bm, col = "red")
 
-list_xs <- function(list_of_xs, plot = FALSE, basemap = NULL, col = "blue") {
+list_xs <- function(xs_list, plot = FALSE, basemap = NULL, col = "blue") {
   xs <- data.table::rbindlist(list_of_xs)
   if ((plot) & (is.null(basemap))) stop("please supply the desired basemap.")
   if ((plot) & (!is.null(basemap))) {

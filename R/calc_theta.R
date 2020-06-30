@@ -11,11 +11,12 @@
 #' @export
 #'
 #' @examples
-#' bm <-
-#' xs <- list_xs(list(select_xs("A", plot = TRUE, basemap = bm, col = "red"),
-#'              select_xs("B", col = "blue"), select_xs("C", col = "green")),
-#'         plot = TRUE, basemap = bm, col = "red")
-#' calc_theta(xs)
+#'
+# # bm <-
+# # xs <- list_xs(list(select_xs("A", plot = TRUE, basemap = bm, col = "red"),
+#              select_xs("B", col = "blue"), select_xs("C", col = "green")),
+#         plot = TRUE, basemap = bm, col = "red")
+# # calc_theta(xs)
 
 
 

@@ -23,12 +23,12 @@
 #'   each well along the cross section. Should be a vector of depths. Defaults to NULL.
 #' @param bos The distance from the ground surface to the tbottom of the screened interval for
 #'   each well along the cross section. Should be a vector of depths. Defaults to NULL.
-#' @param plot_gs. Should a line be plotted between the ground surface elevations (gs_elev)
+#' @param plot_gs Should a line be plotted between the ground surface elevations (gs_elev)
 #'   of the boreholes and wells? Defaults to TRUE.
 #' @param w_width Width of the well screen in inches. Defaults to 0.1.
 #' @param label_shift The vertical distance by which to shift the borehole and/or well
 #'   labels. Defaults to 2.
-#' @param xs_params A list of cross section parameters from the xs_params function (see
+#' @param xs_par A list of cross section parameters from the xs_params function (see
 #'   ?xs_params). Defaults to xs_params().
 #'
 #' @return Plots the wells and boreholes on the cross section set up using grid_xs().
@@ -38,17 +38,18 @@
 #' @export
 #'
 #' @examples
-#' grid_xs(distance = c(100, 200, 550),
-#'         depth = c(30, 15, 55),
-#'         gs_elev = c(10, 12, 11),
-#'         name = "A", xs_par = xs_params())
-#' plot_xs_locs(location = c("MW-1", "BH-5", "CPT-3"),
-#'              type = c("well", "borehole", "cpt"),
-#'              distance = c(100, 200, 550),
-#'              gs_elev = c(11, 8, 12),
-#'              depth = c(60, 42, 90),
-#'              tos = c(45, NA, NA),
-#'              bos = c(55, NA, NA))
+#'
+# grid_xs(distance = c(100, 200, 550),
+#         depth = c(30, 15, 55),
+#         gs_elev = c(10, 12, 11),
+#         name = "A", xs_par = xs_params())
+# plot_xs_locs(location = c("MW-1", "BH-5", "CPT-3"),
+#              type = c("well", "borehole", "cpt"),
+#              distance = c(100, 200, 550),
+#              gs_elev = c(11, 8, 12),
+#              depth = c(60, 42, 90),
+#              tos = c(45, NA, NA),
+#              bos = c(55, NA, NA))
 
 plot_xs_locs <- function(dt = NULL,
                          location = NULL, type = NULL, distance = NULL, gs_elev = NULL,

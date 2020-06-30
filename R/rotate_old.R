@@ -28,38 +28,38 @@ rotate <- function(coords, origin = c(0, 0), theta, units = "rad") {
 }
 
 
-
-xs_lines <- function(xs) {
-  # xs should be a select_xs object or a list_xs object
-  lines <- cbind(xs[, .SD[1:.N-1], by = xs_name],
-                 xs[, list("theta" = atan(diff(y) / diff(x)),
-                           "slope" = diff(y) / diff(x)), by = xs_name][, list(theta, slope)])
-  lines[, intercept := y - slope * x]
-}
-
-offset <- 200
-
-lines <- cbind(xs[, .SD[1:.N-1], by = xs_name],
-               xs[, list("theta" = ifelse(diff(x) < 0, atan(diff(y) / diff(x)) + pi, atan(diff(y) / diff(x)))),
-                  by = xs_name][, list(theta)],
-               xs[, list("slope" = diff(y) / diff(x)), by = xs_name][, list(slope)])
-lines[, c("x_shift", "y_shift") := list(offset * sin(theta), offset * cos(theta))]
-
-pt <- data.frame(locator())
-
-(pt[["x"]] - lines[, x] + lines[, .SD * list(1, -1), .SDcols = c("x_offset", "x_offset")]) /
-  (pt[["y"]] - lines[, y] + lines[, .SD * list(1, -1), .SDcols = c("y_offset", "y_offset")])
-
-lines[, .SD * list(1, -1), .SDcols = c("x_offset", "x_offset")]
-
-
-xs[, list("theta" = atan(diff(y) / diff(x))), by = xs_name][, offset := offset / cos(theta)]
-
-calc_theta(select_xs("1st", plot = TRUE, basemap = bm))
-calc_theta(select_xs("2nd"))
-calc_theta(select_xs("3rd", col = "red"))
-calc_theta(select_xs("4th", col = "red"))
-
-
-
-
+#
+# xs_lines <- function(xs) {
+#   # xs should be a select_xs object or a list_xs object
+#   lines <- cbind(xs[, .SD[1:.N-1], by = xs_name],
+#                  xs[, list("theta" = atan(diff(y) / diff(x)),
+#                            "slope" = diff(y) / diff(x)), by = xs_name][, list(theta, slope)])
+#   lines[, intercept := y - slope * x]
+# }
+#
+# offset <- 200
+#
+# lines <- cbind(xs[, .SD[1:.N-1], by = xs_name],
+#                xs[, list("theta" = ifelse(diff(x) < 0, atan(diff(y) / diff(x)) + pi, atan(diff(y) / diff(x)))),
+#                   by = xs_name][, list(theta)],
+#                xs[, list("slope" = diff(y) / diff(x)), by = xs_name][, list(slope)])
+# lines[, c("x_shift", "y_shift") := list(offset * sin(theta), offset * cos(theta))]
+#
+# pt <- data.frame(locator())
+#
+# (pt[["x"]] - lines[, x] + lines[, .SD * list(1, -1), .SDcols = c("x_offset", "x_offset")]) /
+#   (pt[["y"]] - lines[, y] + lines[, .SD * list(1, -1), .SDcols = c("y_offset", "y_offset")])
+#
+# lines[, .SD * list(1, -1), .SDcols = c("x_offset", "x_offset")]
+#
+#
+# xs[, list("theta" = atan(diff(y) / diff(x))), by = xs_name][, offset := offset / cos(theta)]
+#
+# calc_theta(select_xs("1st", plot = TRUE, basemap = bm))
+# calc_theta(select_xs("2nd"))
+# calc_theta(select_xs("3rd", col = "red"))
+# calc_theta(select_xs("4th", col = "red"))
+#
+#
+#
+#

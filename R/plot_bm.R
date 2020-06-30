@@ -12,8 +12,8 @@
 #' @export
 #'
 #' @examples
-#' bm <-
-#' plot_bm(bm)
+#'
+# plot_bm(bm)
 
 plot_bm <- function(basemap) {
   plot(basemap[, list(x, y)], type = "n",

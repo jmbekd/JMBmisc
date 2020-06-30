@@ -27,9 +27,9 @@
 #'
 #' @examples
 #'
-#' label_chem("A", plot = TRUE, basemap = bm, coll = "red")
+# label_chem("A", plot = TRUE, basemap = bm, col = "red")
 
-label_chem <- function(distance, gs_elev, depth, tos, bos, id, chem) {
+label_chem <- function(distance, gs_elev, depth, tos, bos, chem_id, chem) {
   w_width <- 0.1 # default width of well, in inches
   rect(xleft = dist - h_exag * w_width, ybottom = elev - bos,
        xright = dist, ytop = elev - tos, border = NA,
